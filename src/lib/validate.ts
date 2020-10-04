@@ -4,7 +4,7 @@ import { pipe } from './pipe';
 
 type Result<ok, err> = Success<ok> | Failure<err>;
 
-export function createValidation({
+export function createValidator({
   check,
   errorMessage,
 }: {
