@@ -6,6 +6,7 @@ const isEven = createValidator({
   check: (x) => x % 2 === 0,
   errorMessage: 'is not even',
 });
+
 const isFour = createValidator({
   check: (x) => x === 4,
   errorMessage: 'is not four',
