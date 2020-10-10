@@ -4,12 +4,12 @@
 import { createValidator, validate } from './validate';
 
 const isEven = createValidator({
-  check: (x) => x % 2 === 0,
+  assert: (x) => x % 2 === 0,
   errorMessage: 'is not even',
 });
 
 const isDivisibleByFour = createValidator({
-  check: (x) => x % 4 === 0,
+  assert: (x) => x % 4 === 0,
   errorMessage: 'is not divisible by four',
 });
 
@@ -31,31 +31,28 @@ validate(10).with(validators);
 /
 ```
 
-## improvements
+Optional path argument for validating objects
 
-- Failure object
+```js
+const validators = [
+  createValidator({
+    assert: (x) => x.y.z === 1,
+    path: ['y', 'z'],
+    errorMessage: 'is not 1',
+  }),
+];
 
-  - maybe have optional path ex:
-
-  ```js
-  const validators = [
-    createValidator({
-      check: (x) => x.y.z === 1,
-      path: ['y', 'z'], // could this be inferred?
-      errorMessage: 'is not 1',
-    }),
-  ];
-
-  validate({ y: { z: 2 } }).with(validators);
-  /*
-  {
-    kind: 'failure',
-    error: {
-      input: {y: {z: 2 }},
-      messages: [
-        { message: 'is not 1', value: 2, key: 'z' }
-      ]
-    }
+const formResults = { a: 1, y: { z: 2 } };
+validate(formResults).with(validators);
+/*
+{
+  kind: 'failure',
+  error: {
+    input: {y: {z: 2 }},
+    messages: [
+      { message: 'is not 1', value: 2, key: 'z' }
+    ]
   }
-  */
-  ```
+}
+*/
+```

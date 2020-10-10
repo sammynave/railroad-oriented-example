@@ -8,33 +8,66 @@ function ifElse<s, f>(condition: boolean, onTrue: () => s, onFalse: () => f) {
   return condition ? onTrue() : onFalse();
 }
 
+export function dig<T>(obj: T, path: readonly string[]) {
+  return path.reduce((acc: any, value: any, idx: number) => {
+    if (typeof acc === 'undefined' || acc === null) {
+      return undefined;
+    }
+
+    return idx === path.length + 1 ? acc : acc[value];
+  }, obj);
+}
+
+export function last<T>(arr: readonly T[]) {
+  return arr[arr.length - 1];
+}
+
 export function createValidator({
-  check,
+  assert,
   errorMessage,
+  path,
 }: {
-  readonly check: (y: any) => boolean;
+  readonly assert: (y: any) => boolean;
   readonly errorMessage: string;
+  readonly path?: readonly string[];
 }) {
   return function validation<s, f>(x: Result<s, f>): Result<s | f, s | f> {
     function onSuccess(x: Success<s>) {
       return ifElse<Success<s>, Failure<s>>(
-        check(x.value),
+        assert(x.value),
         () => pass(x.value),
         () =>
           fail({
             input: x.value,
-            messages: [{ message: errorMessage }],
+            messages: [
+              {
+                message: errorMessage,
+                ...(path?.length && {
+                  value: dig<s>(x.value, path),
+                  key: last(path),
+                }),
+              },
+            ],
           })
       );
     }
+
     function onFailure(x: Failure<f>) {
       return ifElse<Failure<f>, Failure<f>>(
-        check(x.error.input),
+        assert(x.error.input),
         () => x,
         () =>
           fail({
             input: x.error.input,
-            messages: x.error.messages.concat([{ message: errorMessage }]),
+            messages: x.error.messages.concat([
+              {
+                message: errorMessage,
+                ...(path?.length && {
+                  value: dig<f>(x.error.input, path),
+                  key: last(path),
+                }),
+              },
+            ]),
           })
       );
     }

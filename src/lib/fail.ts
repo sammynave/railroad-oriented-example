@@ -1,9 +1,10 @@
-type ErrorMessage = {
+type ErrorMessage<T> = {
   readonly message: string;
+  readonly value?: T;
 };
 
 type ErrorMessages<T> = {
-  readonly messages: readonly ErrorMessage[];
+  readonly messages: readonly ErrorMessage<T>[];
   readonly input: T;
 };
 
